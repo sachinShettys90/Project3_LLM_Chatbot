@@ -1,0 +1,13 @@
+# LangChain Core
+langchain
+langchain-core
+
+# OpenAI Integration
+langchain-openai
+openai
+langgraph
+
+# Environment Variable Management
+python-dotenv
+
+
