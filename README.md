@@ -11,6 +11,12 @@ A persistent, streaming chatbot built with **LangGraph**, **LangChain**, and **S
 - ⚙️ **Configurable via environment variables** — swap models, temperature, system prompt, or DB path without touching code
 - 🛡️ **Error handling** — a failed API call surfaces a readable message in the UI instead of crashing the app
 
+## Screenshot
+
+<p align="center">
+  <img src="Chatbot_Streamlit_UIScreenshot.png" width="700" alt="LangGraph Chatbot UI">
+</p>
+
 ## Architecture
 
 ```
