@@ -1,5 +1,5 @@
 import streamlit as st
-from Chatbot_Langgraph_Backend import chatbot
+from Chatbot_Langgraph_Backend import chatbot, retrieve_all_threads
 from langchain_core.messages import HumanMessage
 
 import uuid   # to generate the random thread_id
@@ -43,7 +43,7 @@ if 'thread_id' not in st.session_state:  # if the thread id is not there generat
     st.session_state['thread_id'] = generate_thread_id()
 
 if 'chat_threads' not in st.session_state:
-    st.session_state['chat_threads'] = []
+    st.session_state['chat_threads'] = retrieve_all_threads()
 
 
 # *************************************************Sidebar UI********************************
