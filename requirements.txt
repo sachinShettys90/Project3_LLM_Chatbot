@@ -1,13 +1,6 @@
-# LangChain Core
-langchain
-langchain-core
-
-# OpenAI Integration
-langchain-openai
-openai
-langgraph
-
-# Environment Variable Management
-python-dotenv
-
-
+streamlit>=1.38
+langgraph>=0.2
+langchain-core>=0.3
+langchain-openai>=0.2
+python-dotenv>=1.0
+ 
