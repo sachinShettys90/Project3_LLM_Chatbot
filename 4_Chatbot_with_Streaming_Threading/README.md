@@ -42,14 +42,36 @@ add_thread(st.session_state['thread_id'])
 def reset_chat():
     thread_id = generate_thread_id()
     st.session_state['thread_id'] = thread_id
-    *add_thread(st.session_state['thread_id'])*
+    *add_thread(st.session_state['thread_id'])*---------------------->
     st.session_state['message_history'] = []
 
 
 -> Load all the thread ids in the sidebar
 
+for thread_id in st.session_state['chat_threads']:
+    st.sidebar.text(st.session_state['thread_id'])
+
+
 -> convert the side bar text to clickable buttons
 
+for thread_id in st.session_state['chat_threads']:
+    st.sidebar.button(str(thread_id))
 ********************************************************************************
 
 -> on click of a particular thread id load that particular conversation
+
+def load_conversation(thread_id):
+    return chatbot.get_state(config={'configurable': {'thread_id':thread_id}}).values['messages']
+
+
+for thread_id in st.session_state['chat_threads']:
+    if st.sidebar.button(str(thread_id)):
+        messages=load_conversation(thread_id)
+
+        temp_messages=[]
+        for msg in messages:
+            if isinstance(msg,HumanMessage):
+                role='user'
+            else:
+                role='AI'
+            temp_messages.append({'role':role,'content':msg.content})
