@@ -1,7 +1,8 @@
 # LangGraph Chatbot
 
 A persistent, streaming chatbot built with **LangGraph**, **LangChain**, and **Streamlit**, backed by SQLite for conversation history.
-** Live Demo: ** (https://project3llmchatbot-5gzuszatcnmvhuv6ftx3qn.streamlit.app/)
+
+**Live Demo:** (https://project3llmchatbot-5gzuszatcnmvhuv6ftx3qn.streamlit.app/)
 ## Features
 
 - 🔄 **Streaming responses** — tokens appear live as the model generates them
