@@ -1,7 +1,7 @@
 streamlit>=1.38
 langgraph>=0.2
+langgraph-checkpoint-sqlite>=2.0
 langchain-core>=0.3
 langchain-openai>=0.2
 python-dotenv>=1.0
-langgraph-checkpoint-sqlite>=2.0
- 
+langsmith>=0.1
