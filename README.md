@@ -2,7 +2,7 @@ LangGraph Chatbot with LangSmith Observability & Evaluation
 
 A persistent, streaming chatbot built with LangGraph, LangChain, and Streamlit, backed by SQLite for conversation history and enhanced with LangSmith for LLM tracing, observability, and evaluation.
 
-Live Demo: https://project3llmchatbot-5gzuszatcnmvhuv6ftx3qn.streamlit.app/
+Live Demo: https://project3llmchatbot-kbggeqcsq6wgsuoddvrug6.streamlit.app/
 
 🚀 Overview
 
