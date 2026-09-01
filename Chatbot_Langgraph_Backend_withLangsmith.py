@@ -38,8 +38,6 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-os.environ['LANGCHAIN_PROJECT'] = 'Chatbot'
-
 
 # --------------------------------------------------------------------------- #
 # Configuration
