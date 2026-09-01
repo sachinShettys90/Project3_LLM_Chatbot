@@ -57,20 +57,24 @@ SQLite Checkpointer
 🆕 Enhanced Architecture
 The latest version integrates LangSmith with the LangGraph chatbot to provide tracing, observability, and evaluation.
 
-flowchart TD
-    A["🖥️ Streamlit UI<br/>Chatbot Frontend"]
-    B["🔄 LangGraph<br/>StateGraph"]
-    C["💬 Chat Node"]
-    D["🤖 ChatOpenAI"]
-    E["💾 SQLite<br/>Checkpointer"]
-    F["🔍 LangSmith<br/>Observability + Evaluation"]
-
-    A --> B
-    B --> C
-    C --> D
-    B --> E
-    B -. "Traces" .-> F
-    D -. "LLM Traces" .-> F
+Streamlit UI
+     │
+     ▼
+LangGraph StateGraph
+     │
+     ▼
+  Chat Node
+     │
+     ▼
+ ChatOpenAI
+     │
+     ├──────────────► LangSmith
+     │                • Tracing
+     │                • Observability
+     │                • Evaluation
+     │
+     ▼
+SQLite Checkpointer
 
 LangSmith provides visibility into the execution of the LangGraph application without changing the core conversational workflow.
 
