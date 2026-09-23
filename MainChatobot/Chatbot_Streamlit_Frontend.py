@@ -13,7 +13,7 @@ Improvements over the base version:
 import streamlit as st
 from langchain_core.messages import HumanMessage
 
-from Chatbot_Langgraph_Backend import (
+from MainChatobot.Chatbot_Langgraph_Backend import (
     chatbot,
     delete_thread,
     generate_thread_id,

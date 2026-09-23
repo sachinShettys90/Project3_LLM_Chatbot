@@ -1,5 +1,5 @@
 import streamlit as st
-from Chatbot_Langgraph_Backend import chatbot
+from MainChatobot.Chatbot_Langgraph_Backend import chatbot
 from langchain_core.messages import HumanMessage
 
 import uuid   # to generate the random thread_id
