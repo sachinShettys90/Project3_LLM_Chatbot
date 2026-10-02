@@ -1,5 +1,5 @@
 # backend.py
-
+# Here we are using 3 tools in the chatbot 1.Calculator, 2.DuckduckgoSearch, 3.Stockmarket with API
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage
