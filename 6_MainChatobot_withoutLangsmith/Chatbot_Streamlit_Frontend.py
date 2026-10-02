@@ -13,7 +13,7 @@ Improvements over the base version:
 import streamlit as st
 from langchain_core.messages import HumanMessage
 
-from MainChatobot.Chatbot_Langgraph_Backend import (
+from Chatbot_Langgraph_Backend import (
     chatbot,
     delete_thread,
     generate_thread_id,
@@ -67,7 +67,8 @@ def add_thread(thread_id: str) -> None:
 def switch_thread(thread_id: str) -> None:
     messages = load_conversation(thread_id)
     st.session_state["message_history"] = [
-        {"role": "user" if isinstance(m, HumanMessage) else "assistant", "content": m.content}
+        {"role": "user" if isinstance(
+            m, HumanMessage) else "assistant", "content": m.content}
         for m in messages
     ]
     st.session_state["thread_id"] = thread_id
@@ -115,7 +116,8 @@ with st.sidebar:
                 remove_thread(thread_id)
                 st.rerun()
 
-    st.markdown('<div class="app-footer">Built with LangGraph + Streamlit</div>', unsafe_allow_html=True)
+    st.markdown('<div class="app-footer">Built with LangGraph + Streamlit</div>',
+                unsafe_allow_html=True)
 
 
 # --------------------------------------------------------------------------- #
@@ -130,7 +132,8 @@ user_input = st.chat_input("Type your message here…")
 if user_input:
     add_thread(st.session_state["thread_id"])
 
-    st.session_state["message_history"].append({"role": "user", "content": user_input})
+    st.session_state["message_history"].append(
+        {"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
@@ -154,4 +157,5 @@ if user_input:
             full_response = f"⚠️ Something went wrong while generating a response: {exc}"
             placeholder.error(full_response)
 
-    st.session_state["message_history"].append({"role": "assistant", "content": full_response})
+    st.session_state["message_history"].append(
+        {"role": "assistant", "content": full_response})
