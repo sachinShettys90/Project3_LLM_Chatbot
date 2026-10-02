@@ -1,17 +1,14 @@
 """
-LangGraph Chatbot Frontend (Streamlit)
----------------------------------------
-Improvements over the base version:
-  - Polished page config, custom CSS, and a branded header/footer
-  - Sidebar shows readable conversation titles (not raw UUIDs), newest first
-  - Per-conversation delete button
-  - Robust error handling around streaming so a failed API call doesn't crash the app
-  - Markdown rendering for AI responses (code blocks, lists, etc. render properly)
-  - "Thinking…" spinner while waiting for the first token
+LangGraph Chatbot Frontend (Streamlit) - with Tool Calling
+-----------------------------------------------------------
+  - Streams only the assistant's text (tool-call chunks and raw ToolMessages are ignored)
+  - Shows which tool is being used (search / stock / calculator) while it runs
+  - Saved history hides tool plumbing (ToolMessages and empty tool-call AI messages)
+  - Readable sidebar titles, per-conversation delete, error handling, markdown rendering
 """
 
 import streamlit as st
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage, ToolMessage
 
 from Chatbot_Langgraph_Backend_withLangsmith import (
     chatbot,
@@ -21,6 +18,17 @@ from Chatbot_Langgraph_Backend_withLangsmith import (
     load_conversation,
     retrieve_all_threads,
 )
+
+TOOL_LABELS = {
+    "duckduckgo_search": "🔎 Web search",
+    "get_stock_price": "📈 Stock price",
+    "calculator": "🧮 Calculator",
+}
+
+
+def tool_label(name: str) -> str:
+    return TOOL_LABELS.get(name, f"🔧 {name}")
+
 
 # --------------------------------------------------------------------------- #
 # Page setup
@@ -65,12 +73,24 @@ def add_thread(thread_id: str) -> None:
 
 
 def switch_thread(thread_id: str) -> None:
-    messages = load_conversation(thread_id)
-    st.session_state["message_history"] = [
-        {"role": "user" if isinstance(
-            m, HumanMessage) else "assistant", "content": m.content}
-        for m in messages
-    ]
+    """Load a saved thread, keeping only user messages and final AI answers.
+    Tool names used for each answer are re-attached so the badge still shows."""
+    history = []
+    pending_tools: list[str] = []
+    for m in load_conversation(thread_id):
+        if isinstance(m, HumanMessage):
+            history.append({"role": "user", "content": m.content, "tools": []})
+            pending_tools = []
+        elif isinstance(m, AIMessage):
+            if m.tool_calls:
+                pending_tools.extend(tc["name"] for tc in m.tool_calls)
+            elif m.content:
+                history.append(
+                    {"role": "assistant", "content": m.content,
+                     "tools": pending_tools})
+                pending_tools = []
+        # ToolMessage -> skipped
+    st.session_state["message_history"] = history
     st.session_state["thread_id"] = thread_id
 
 
@@ -125,28 +145,33 @@ with st.sidebar:
 # --------------------------------------------------------------------------- #
 for message in st.session_state["message_history"]:
     with st.chat_message(message["role"]):
+        if message.get("tools"):
+            st.caption("Used: " + ", ".join(
+                dict.fromkeys(tool_label(t) for t in message["tools"])))
         st.markdown(message["content"])
 
-user_input = st.chat_input("Type your message here…")
+user_input = st.chat_input(
+    "Ask anything — I can search the web, check stocks, and calculate…")
 
 if user_input:
     add_thread(st.session_state["thread_id"])
 
     st.session_state["message_history"].append(
-        {"role": "user", "content": user_input})
+        {"role": "user", "content": user_input, "tools": []})
     with st.chat_message("user"):
         st.markdown(user_input)
 
     CONFIG = {
         "configurable": {"thread_id": st.session_state["thread_id"]},
-        # Surfaces thread_id as a filterable tag/metadata field on every
-        # LangSmith trace produced by this call (no-op if tracing is off).
         "tags": [f"thread:{st.session_state['thread_id']}"],
         "metadata": {"thread_id": st.session_state["thread_id"]},
     }
 
+    tools_used: list[str] = []
+
     with st.chat_message("assistant"):
-        placeholder = st.empty()
+        tool_slot = st.empty()      # shows tool activity above the answer
+        placeholder = st.empty()    # streams the answer text
         full_response = ""
         try:
             with st.spinner("Thinking…"):
@@ -155,13 +180,36 @@ if user_input:
                     config=CONFIG,
                     stream_mode="messages",
                 ):
-                    if message_chunk.content:
-                        full_response += message_chunk.content
-                        placeholder.markdown(full_response + "▌")
+                    # 1) LLM decided to call a tool -> show which one
+                    if isinstance(message_chunk, AIMessageChunk):
+                        for tc in message_chunk.tool_call_chunks or []:
+                            name = tc.get("name")
+                            if name and name not in tools_used:
+                                tools_used.append(name)
+                                tool_slot.caption(
+                                    "Using: " + ", ".join(
+                                        tool_label(t) for t in tools_used) + " …")
+
+                        # 2) Normal answer text (skip empty tool-call chunks)
+                        if (
+                            metadata.get("langgraph_node") == "chat_node"
+                            and isinstance(message_chunk.content, str)
+                            and message_chunk.content
+                        ):
+                            full_response += message_chunk.content
+                            placeholder.markdown(full_response + "▌")
+
+                    # 3) ToolMessage (raw tool output) -> intentionally not displayed
+                    elif isinstance(message_chunk, ToolMessage):
+                        continue
+
             placeholder.markdown(full_response)
-        except Exception as exc:  # noqa: BLE001 - surface any API/streaming failure to the user
+            if tools_used:
+                tool_slot.caption(
+                    "Used: " + ", ".join(tool_label(t) for t in tools_used))
+        except Exception as exc:  # noqa: BLE001
             full_response = f"⚠️ Something went wrong while generating a response: {exc}"
             placeholder.error(full_response)
 
     st.session_state["message_history"].append(
-        {"role": "assistant", "content": full_response})
+        {"role": "assistant", "content": full_response, "tools": tools_used})
